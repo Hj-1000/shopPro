@@ -1,6 +1,7 @@
 package com.example.shopproj.entity;
 
 import com.example.shopproj.constant.ItemSellStatus;
+import com.example.shopproj.entity.base.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -15,7 +16,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Item {
+public class Item extends BaseEntity {
     @Id
     @Column(name = "item_id")       // 테이블에서 매핑될 컬럼
     @GeneratedValue(strategy = GenerationType.IDENTITY)
