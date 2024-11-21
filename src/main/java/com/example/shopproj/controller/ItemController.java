@@ -1,9 +1,20 @@
 package com.example.shopproj.controller;
 
+import com.example.shopproj.dto.ItemDTO;
+import com.example.shopproj.entity.Item;
+import com.example.shopproj.service.ItemService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.security.Principal;
+import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
@@ -11,11 +22,76 @@ import org.springframework.web.bind.annotation.GetMapping;
 public class ItemController {
     //이전 boardController 라고 생각하면 됨
 
+    private  final ItemService itemService;
+
     @GetMapping("/admin/item/new")
-    public String itemForm(){
+    public String itemForm(Model model , Principal principal){
+
+        if (principal == null){
+            // principal == null :로그인이 안되어있다면
+            // 아래 주소로 보내버린다.그래서 못들어온다.
+//            return "redirect:/";
+        }
+        if (principal != null){
+            // principal != null :로그인이 되어있다면
+            log.info("현재로그인한사람");
+            log.info(principal.getName());
+//            return "redirect:/";
+        }
+
+        model.addAttribute("itemDTO", new ItemDTO());
 
         return "/item/itemForm";
     }
 
+    @PostMapping("/admin/item/new")
+    public String itemFormPost(@Valid ItemDTO itemDTO, BindingResult bindingResult, List<MultipartFile> multipartFile, Model model){
+
+        //들어오는 값 확인
+        log.info("들어오는 값 확인 " + itemDTO);
+        if (multipartFile != null){
+            for (MultipartFile img : multipartFile){
+                if (img.getOriginalFilename().equals("")){
+                    log.info(img.getOriginalFilename());
+                }
+            }
+        }
+
+        if (bindingResult.hasErrors()){
+            log.info("유효성검사 에러");
+            log.info(bindingResult.getAllErrors()); // 확인된 모든 에러 콘솔창 출력
+
+            return "/item/itemForm";    // 다시 이전 페이지
+        }
+
+        try {
+            Long SavedItemId =
+                    itemService.saveItem(itemDTO, multipartFile);
+
+        }catch (Exception e){
+            e.printStackTrace();
+            model.addAttribute("msg","파일등록을 잘해주세요");
+            return "/item/itemForm";
+        }
+
+
+        log.info("상품등록됨!!!");
+        log.info("상품등록됨!!!");
+
+        return null;
+
+    }
+
+    @GetMapping("/admin/read")
+    public String adminread(Long id, Model model){
+        log.info("잘 불러오는가?" + id);
+        ItemDTO itemDTO =
+        itemService.read(id);
+
+        log.info("잘 불러오는가?" + itemDTO);
+        model.addAttribute("itemDTO",itemDTO);
+
+        return "/item/read";
+    }
 
 }

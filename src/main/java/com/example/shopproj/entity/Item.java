@@ -8,11 +8,12 @@ import lombok.*;
 import javax.swing.text.ParagraphView;
 import java.nio.file.attribute.PosixFileAttributeView;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Getter
 @Setter
-@ToString
+@ToString   //(exclude = "itemImgList")
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -37,8 +38,13 @@ public class Item extends BaseEntity {
     @Enumerated(EnumType.STRING)        //enum 가지고 만듬 YES/NO, SELL/SOLD_OUT
     private ItemSellStatus itemSellStatus;  // 상품 판매 상태
 
-    private LocalDateTime regTime;      //상품등록시간
-    private LocalDateTime updateTime;   //상품수정시간
+//    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "member_id")
+//    private Member member;
+
+    @OneToMany
+    @JoinColumn(name = "item_id")
+    private List<ItemImg> itemImgList;
 
 
 }
