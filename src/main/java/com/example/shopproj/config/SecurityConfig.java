@@ -26,9 +26,9 @@ public class SecurityConfig {
                 // 권한 페이지 접속권한
                 .authorizeHttpRequests(
                         authorization -> authorization
-                                .requestMatchers("/members/login/**").permitAll()      //로그인페이지는 누구나 접속이 가능한 권한
-                                .requestMatchers("/board/register").authenticated() // 로그인 한 사람만 접속 가능
+                                .requestMatchers("/members/login/**").permitAll()//로그인페이지는 누구나 접속이 가능한 권한
                                 .requestMatchers("/admin/**").hasRole("ADMIN")
+                                .requestMatchers("/board/register").authenticated() // 로그인 한 사람만 접속 가능
                                 .requestMatchers("/user/list").hasRole("ADMIN")
                                 .anyRequest().permitAll()       // 그외 다 열어
 //                            .anyRequest().authenticated()   //그 이외에는 다 로그인해서 접속해

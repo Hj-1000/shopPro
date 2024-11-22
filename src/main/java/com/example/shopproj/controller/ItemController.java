@@ -1,8 +1,10 @@
 package com.example.shopproj.controller;
 
 import com.example.shopproj.dto.ItemDTO;
-import com.example.shopproj.entity.Item;
+import com.example.shopproj.dto.PageRequestDTO;
+import com.example.shopproj.dto.PageResponseDTO;
 import com.example.shopproj.service.ItemService;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -12,7 +14,9 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.awt.font.ShapeGraphicAttribute;
 import java.security.Principal;
 import java.util.List;
 
@@ -83,15 +87,33 @@ public class ItemController {
     }
 
     @GetMapping("/admin/read")
-    public String adminread(Long id, Model model){
-        log.info("잘 불러오는가?" + id);
-        ItemDTO itemDTO =
-        itemService.read(id);
+    public String adminread(Long id, Model model, RedirectAttributes redirectAttributes){
 
-        log.info("잘 불러오는가?" + itemDTO);
-        model.addAttribute("itemDTO",itemDTO);
+        try {
 
-        return "/item/read";
+            log.info("잘 불러오는가?" + id);
+            ItemDTO itemDTO =
+                    itemService.read(id);
+            model.addAttribute("itemDTO",itemDTO);
+            return "item/read";
+        }catch (EntityNotFoundException e){
+            redirectAttributes.addFlashAttribute("msg","존재하지않는 상품입니다.");
+            return "redirect:/admin/item/list";
+        }
+
+
+
+    }
+    @GetMapping("/admin/item/list")
+    public String adminlist(PageRequestDTO pageRequestDTO, Model model, Principal principal){
+//        model.addAttribute("list", itemService.list());
+
+        PageResponseDTO<ItemDTO> pageResponseDTO =
+        itemService.list(pageRequestDTO, principal.getName());
+
+        model.addAttribute("pageResponseDTO",pageResponseDTO);
+
+        return  "item/list";
     }
 
 }

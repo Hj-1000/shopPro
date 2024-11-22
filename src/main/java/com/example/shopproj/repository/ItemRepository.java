@@ -1,6 +1,7 @@
 package com.example.shopproj.repository;
 
 import com.example.shopproj.entity.Item;
+import com.example.shopproj.repository.search.ItemSearchRepository;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -8,7 +9,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-public interface ItemRepository extends JpaRepository<Item, Long> {
+public interface ItemRepository extends JpaRepository<Item, Long> , ItemSearchRepository {
     //제품명으로 검색 제품명은 동일한 이름이 있을 수 있으니
     // 여러개 출력 가능 List를 사용하겠다.
 
