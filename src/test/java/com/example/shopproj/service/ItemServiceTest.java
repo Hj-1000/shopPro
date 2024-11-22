@@ -27,6 +27,8 @@ class ItemServiceTest {
         PageRequestDTO pageRequestDTO =
                 new PageRequestDTO();
 
+        pageRequestDTO.setSearchDateType("6m");
+
         PageResponseDTO<ItemDTO> itemDTOPageResponseDTO =
                 itemService.list(pageRequestDTO, email);
 
