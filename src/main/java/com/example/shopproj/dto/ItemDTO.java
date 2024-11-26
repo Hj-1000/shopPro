@@ -9,6 +9,7 @@ import lombok.*;
 import org.hibernate.validator.constraints.Length;
 import org.modelmapper.ModelMapper;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -19,7 +20,7 @@ import java.util.stream.Collectors;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ItemDTO extends BaseEntity {
+public class ItemDTO{
 
     private Long id; // 상품코드
 
@@ -38,6 +39,10 @@ public class ItemDTO extends BaseEntity {
     @NotBlank
     private String itemDetail;  // 상품 상세설명
     // 상품 판매 상태
+
+    private String createBy;
+    private LocalDateTime regTime;
+    private LocalDateTime updateTime;
 
     private ItemSellStatus itemSellStatus;  // 상품 판매 상태
 

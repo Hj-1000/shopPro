@@ -13,7 +13,11 @@ public interface ItemRepository extends JpaRepository<Item, Long> , ItemSearchRe
     //제품명으로 검색 제품명은 동일한 이름이 있을 수 있으니
     // 여러개 출력 가능 List를 사용하겠다.
 
+
+
      public List<Item> findByItemNm (String itemNm);
+
+     public Item findByIdAndCreateBy(Long id, String email);
 
      //동적 쿼리문
      @Query("select i from Item i where i.itemNm = :itemNm")

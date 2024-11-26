@@ -43,7 +43,7 @@
 
 
                 <div class="col-12 text-center">
-                    <button type="submit" class="btn btn-primary formbtn" th:href="@{/admin/item/new}">로그인</button>
+                    <button type="submit" class="btn btn-primary formbtn">로그인</button>
                     <button type="submit" class="btn btn-primary">회원가입</button>
                 </div>
 
@@ -53,6 +53,11 @@
 
     </div>
 
+    <script>
+        $(".formbtn").on("click", function () {
+            location.href = "/admin/item/list"
+        })
+    </script>
 </th:block>
 
 

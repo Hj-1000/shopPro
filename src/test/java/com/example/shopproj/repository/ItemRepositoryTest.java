@@ -36,6 +36,15 @@ class ItemRepositoryTest {
     @PersistenceContext
     EntityManager entityManager;
 
+//    @Test
+//    @Transactional
+//    public void findByIdAndCreateBy(){
+//        Long id = 407L;
+//        String email = "sin@a.a";
+//
+//        log.info(itemRepository.findByIdaAndCreateBy(id, email));
+//    }
+
     @Test
     @DisplayName("양방향 테스트")
     @Transactional
