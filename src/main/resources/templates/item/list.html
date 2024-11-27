@@ -97,6 +97,10 @@
         </div>
     </th:block>
 
+    <div class="delform">
+
+    </div>
+
     <script th:inline="javascript">
 
         $(document).ready(function () {
@@ -105,10 +109,17 @@
                 location.href = "/admin/item/update?id=" + $(this).val();
             })
             $(".delMoveBtn").on("click", function () {
-                location.href = "/admin/item/update?id=" + $(this).val();
+                let formtag = document.createElement("form")
+
+                // 위에 form 태그와는 상관없이 만들어보는 기능
+                formtag.action = "/admin/item/del";
+                formtag.method = "post";
+                formtag.innerHTML = "<input name='id' value='" + this.value + "'>";
+
+                $(".delform").append(formtag);
+
+                formtag.submit();
             })
-
-
         })
 
 
@@ -117,6 +128,8 @@
             location.href = "/admin/item/new";
         })
     </script>
+
+
 
 </th:block>
 

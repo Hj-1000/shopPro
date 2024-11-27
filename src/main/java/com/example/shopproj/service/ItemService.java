@@ -6,6 +6,7 @@ import com.example.shopproj.dto.PageResponseDTO;
 import com.example.shopproj.entity.Item;
 import com.example.shopproj.repository.ItemRepository;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.persistence.Id;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -147,6 +148,32 @@ public class ItemService {
         }
 
         return null;
+    }
+
+    public void remove(Long id){
+        log.info("서비스로 들어온 삭제할 아이템 번호 : " + id);
+
+        itemRepository.deleteById(id);
+
+        // 삭제를 테스트 할 수 있는 조건 만들기
+    }
+
+    public PageResponseDTO<ItemDTO> mainList(PageRequestDTO pageRequestDTO) {
+
+        Pageable pageable = pageRequestDTO.getPageable("id");
+        Page<Item> items =
+                itemRepository.getAdminItemPage(pageRequestDTO, pageable);
+        List<ItemDTO> itemDTOPage =
+                items.getContent().stream().map(item -> modelMapper.map(item, ItemDTO.class))
+                        .collect(Collectors.toList());
+
+        PageResponseDTO<ItemDTO> itemDTOPageResponseDTO
+                = PageResponseDTO.<ItemDTO>withAll()
+                .pageRequestDTO(pageRequestDTO)
+                .dtoList(itemDTOPage)
+                .total((int) items.getTotalElements())
+                .build();
+        return itemDTOPageResponseDTO;
     }
 
 }

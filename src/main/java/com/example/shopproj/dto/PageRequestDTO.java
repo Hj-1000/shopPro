@@ -1,5 +1,6 @@
 package com.example.shopproj.dto;
 
+import com.example.shopproj.constant.ItemSellStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -35,11 +36,9 @@ public class PageRequestDTO {
   private String searchDateType;  // all, 1d, 1w ,1m ,6M
                                   // <select name = "searchdatetype>
 
-  private Long correspondent_num;
+  private ItemSellStatus itemSellStatus;
 
-  private Long company_num;
-
-
+  private String searchBy;
 
   public String[] getTypes(){
 
