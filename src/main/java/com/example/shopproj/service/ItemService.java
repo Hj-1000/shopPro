@@ -74,12 +74,20 @@ public class ItemService {
         Item item =
                 itemRepository.findById(id).orElseThrow(EntityNotFoundException::new);
 
-        ItemDTO itemDTO = modelMapper.map(item, ItemDTO.class)
-                .setItemImgDTOList(item.getItemImgList());
+        if (item.getCreateBy().equals(email)){
+            ItemDTO itemDTO = modelMapper.map(item, ItemDTO.class)
+                    .setItemImgDTOList(item.getItemImgList());
+            return itemDTO;
+
+        }else {
+            ItemDTO itemDTO = null;
+            return itemDTO;
+        }
 
 
 
-        return itemDTO;
+
+
     }
 
 
