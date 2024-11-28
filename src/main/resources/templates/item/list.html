@@ -76,7 +76,7 @@
                     <ul class="pagination">
                         <!--이전으로-->
                         <th:block th:if="${pageResponseDTO.prev}">
-                            <li class="page-item"><a class="page-link" th:href="|@{'/admin/item/list?page=' +${pageResponseDTO.start-1}}|">Previous</a></li>
+                            <li class="page-item"><a class="page-link" th:href="|@{'/admin/item/list?page=' +${pageResponseDTO.start -1}}|">Previous</a></li>
 
                         </th:block>
 
@@ -96,7 +96,6 @@
             </div>
         </div>
     </th:block>
-
     <div class="delform">
 
     </div>
