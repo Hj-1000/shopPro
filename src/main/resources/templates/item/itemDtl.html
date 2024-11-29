@@ -69,7 +69,7 @@
                                             function order() {
                                                 let url = "/order";
                                                 let paramDate = {
-                                                    itemId : $("#itemid").val(),    //기존에 변수명 id 에서 itemId로 변경함 orderDTO 때문
+                                                    itemId : $("#itemid").val(),
                                                     count : $("#count").val()
                                                 }
 
@@ -87,11 +87,17 @@
                                                     success : function (result) {
                                                         console.log(result)
                                                         alert(result)
-                                                        location.href = "/"
+                                                        location.href = "/";
 
                                                     } ,
                                                     error : function (result, status, error) {
+                                                        console.log(result)
+                                                        console.log(error.status)
 
+                                                        if (result.status == '401'){
+                                                            alert("로그인 후 이용해주세요");
+                                                            location.href = "/members/login"
+                                                        }
                                                     }
 
                                                 })

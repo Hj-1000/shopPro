@@ -19,6 +19,8 @@ import java.util.List;
 @Table(name = "orders")
 public class Order extends BaseTimeEntity {
 
+
+
     @Id
     @Column(name = "order_id")   // 테이블에서 매핑될 컬럼
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -41,6 +43,10 @@ public class Order extends BaseTimeEntity {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL,
             orphanRemoval = true, fetch = FetchType.LAZY)
     private List<OrderItem> orderItemList = new ArrayList<>();
+
+    public void setOrderItemList(OrderItem item) {
+        this.orderItemList.add(item);
+    }
 
     private LocalDateTime orderDate;    // 주문일
 

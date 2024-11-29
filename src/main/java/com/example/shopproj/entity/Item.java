@@ -42,7 +42,9 @@ public class Item extends BaseEntity {
 //    @JoinColumn(name = "member_id")
 //    private Member member;
 
-    @OneToMany(mappedBy = "item", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "item", cascade = CascadeType.ALL,
+            orphanRemoval = true, fetch = FetchType.LAZY)
+
 
     private List<ItemImg> itemImgList;
 

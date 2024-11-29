@@ -1,6 +1,6 @@
 package com.example.shopproj.entity;
 
-import com.example.shopproj.constant.OrderStatus;
+
 import com.example.shopproj.entity.base.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
@@ -10,7 +10,7 @@ import java.time.LocalDateTime;
 @Entity
 @Getter
 @Setter
-@ToString   //(exclude = "itemImgList")
+@ToString (exclude = "order")  //(exclude = "itemImgList")
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder

@@ -156,7 +156,8 @@ public class ItemController {
 
     }
     @PostMapping("/admin/item/update")
-    public String adminupdatePost(@Valid ItemDTO itemDTO,BindingResult bindingResult , List<MultipartFile> multipartFiles, Integer[] delino, Long mainino){
+    public String adminupdatePost(@Valid ItemDTO itemDTO,BindingResult bindingResult ,
+                                  List<MultipartFile> multipartFiles, Integer[] delino, Long mainino){
 
 
         
