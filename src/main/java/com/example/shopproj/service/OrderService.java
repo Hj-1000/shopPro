@@ -42,6 +42,60 @@ public class OrderService {
     // 단 주문목록들이 들어있는 주문row한개는 누구의 주문인지 알기위해서
     // email을 받는다.
 
+
+    //내 주문이 맞는지 체크
+    public boolean validateOrder(Long orderId, String email){
+
+        Member member =
+                memberRepository.findByEmail(email);
+
+        Order order =
+                orderRepository.findById(orderId)
+                        .orElseThrow(EntityNotFoundException::new);
+        //주문id로 찾은 주문테이블의 회원 참조email과  현재 로그인 한사람을 비교
+        if(  !StringUtils.equals(member.getEmail() , order.getMember().getEmail() )){
+            return false;
+        }
+
+        return true;
+
+
+    }
+
+
+    //주문 취소
+    public void cancelOrder(Long orderId){
+        //삭제할 번호를 받아서 삭제
+
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(EntityNotFoundException::new);
+        //주문상태인 orderStatus를 주문취소상태로 변경
+        order.setOrderStatus(OrderStatus.CANCEL);
+        //주문 자식인 주문아이템들의 주문수량을 가지고 item의 주문수량에 더한다.
+
+        for(OrderItem orderItem   :   order.getOrderItemList()  ){
+
+            orderItem.getItem().setStockNumber(
+
+                    orderItem.getItem().getStockNumber() + orderItem.getCount()
+
+            );
+        }
+
+        //자식을 하지 않고 주문취소만 만든다 데이터가 쌓인다.
+
+
+
+
+
+
+
+
+
+
+    }
+
+
     public Long order(OrderDTO orderDTO, String email){   //principal.getName()로 가져온다. 로그인을 했다면
         //현재 선택한 아이템의 id는 orderDTO로 들어온다 이값으로 판매중인 item Entity를 가져온다.
         Item  item = itemRepository.findById(  orderDTO.getItemId()  )
@@ -98,6 +152,7 @@ public class OrderService {
 
     }
 
+
     //구매이력
     public Page<OrderHistDTO> getOrderList(String email, Pageable pageable) {
         //repository에서 필요한 email
@@ -105,83 +160,52 @@ public class OrderService {
         //구매목록
         List<Order> orderList = orderRepository.findOrders(email, pageable);
 
-        List<OrderHistDTO> orderHistDTOList = new ArrayList<>();
-
         //페이징처리를 위한 총 구매목록의 수
         Long totalCount = orderRepository.totalCount(email);
 
-        //EntityToDto   //주문, 주문아이템들, 주문아이템들의 이미지
+
+        //구매목록의 구매아이템들을 만들어주기위한 List
+        List<OrderHistDTO> orderHistDTOList = new ArrayList<>();
+
+        //EntityToDto  //주문 , 주문아이템들, 주문아이템들의 이미지
         for (Order order : orderList) {
+
             OrderHistDTO orderHistDTO = new OrderHistDTO();
-            orderHistDTO.setOrderID( order.getId() );
-            orderHistDTO.setOrderDate( order.getOrderDate());
-            orderHistDTO.setOrderStatus( order.getOrderStatus() );
+            orderHistDTO.setOrderId(order.getId());
+            orderHistDTO.setOrderDate(order.getOrderDate());
+            orderHistDTO.setOrderStatus(order.getOrderStatus());
 
             List<OrderItem> orderItemList = order.getOrderItemList();
+
             for (OrderItem orderItem : orderItemList) {
 
                 OrderItemDTO orderItemDTO = new OrderItemDTO();
-                orderItemDTO.setId(order.getId());
-                orderItemDTO.setItemNm(orderItem.getItem().getItemNm());
-                orderItemDTO.setOrderPrice(orderItem.getOrderPrice());
-                orderItemDTO.setCount(orderItem.getCount());
+                orderItemDTO.setId(          order.getId());
+                orderItemDTO.setItemNm(      orderItem.getItem().getItemNm() );
+                orderItemDTO.setOrderPrice(  orderItem.getOrderPrice() );
+                orderItemDTO.setCount(       orderItem.getCount()  );
 
                 //아이템 주문아이템들중 1개 A
                 List<ItemImg> itemImgList = orderItem.getItem().getItemImgList();
                 //A에 달려있는 이미지들
                 //그중에 대표이미지
-                for (ItemImg itemImg : itemImgList) {
+                for( ItemImg itemImg :itemImgList){
                     if(itemImg.getRepimgYn().equals("Y")){
 
-                        orderItemDTO.setImgUrl(itemImg.getImgUrl());
+                        orderItemDTO.setImgUrl(  itemImg.getImgUrl() );
+
                     }
                 }
-
                 orderHistDTO.addOrderItemDTO(orderItemDTO);
 
-                //디비에서 새로 가져온다 쿼리 부담 있음
-
-                //현재 orderItem에서 for문으로 Y 대표이미지 찾는다.
             }
 
-            orderHistDTOList.add(orderHistDTO);
-        }
 
+            orderHistDTOList.add(orderHistDTO);
+
+        }
         return new PageImpl<OrderHistDTO>(orderHistDTOList, pageable, totalCount);
     }
 
-    // 내 주문이 맞는지 체크
-    public boolean validateOrder(Long orderId, String email){
-
-        Member member =
-                memberRepository.findByEmail(email);
-
-        Order order =
-                orderRepository.findById(orderId).orElseThrow(EntityNotFoundException::new);
-        // 주문 id 로 찾은 주문테이블의 회원 참조 email과 현재 로그인 한 사람을 비교
-        if (!StringUtils.equals(member.getEmail(), order.getMember().getEmail())){
-            return false;
-        }
-        return true;
-    }
-
-
-    // 주문 취소
-    public  void  cancelOrder(Long orderID){
-
-        Order order =
-        orderRepository.findById(orderID).orElseThrow(EntityNotFoundException::new);
-
-        order.setOrderStatus(OrderStatus.CANCEL);
-        // 주문 자식인 주문아이템들의 주문수량을 가지고 item의 주문수량에 더한다.
-
-        for (OrderItem orderItem : order.getOrderItemList()){
-            orderItem.getItem().setStockNumber(
-                 orderItem.getItem().getStockNumber() + orderItem.getCount()
-            );
-        }
-
-    }
-
-
 }
+
