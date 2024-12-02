@@ -44,8 +44,6 @@ public class Item extends BaseEntity {
 
     @OneToMany(mappedBy = "item", cascade = CascadeType.ALL,
             orphanRemoval = true, fetch = FetchType.LAZY)
-
-
     private List<ItemImg> itemImgList;
 
 

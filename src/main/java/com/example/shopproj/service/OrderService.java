@@ -1,5 +1,6 @@
 package com.example.shopproj.service;
 
+import ch.qos.logback.core.util.StringUtil;
 import com.example.shopproj.constant.OrderStatus;
 import com.example.shopproj.dto.OrderDTO;
 import com.example.shopproj.dto.OrderHistDTO;
@@ -17,6 +18,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.config.annotation.web.OAuth2ResourceServerDsl;
 import org.springframework.stereotype.Service;
+import org.thymeleaf.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -112,7 +114,7 @@ public class OrderService {
         for (Order order : orderList) {
             OrderHistDTO orderHistDTO = new OrderHistDTO();
             orderHistDTO.setOrderID( order.getId() );
-            orderHistDTO.setOrderDate( order.getOrderDate().toString());
+            orderHistDTO.setOrderDate( order.getOrderDate());
             orderHistDTO.setOrderStatus( order.getOrderStatus() );
 
             List<OrderItem> orderItemList = order.getOrderItemList();
@@ -146,6 +148,39 @@ public class OrderService {
         }
 
         return new PageImpl<OrderHistDTO>(orderHistDTOList, pageable, totalCount);
+    }
+
+    // 내 주문이 맞는지 체크
+    public boolean validateOrder(Long orderId, String email){
+
+        Member member =
+                memberRepository.findByEmail(email);
+
+        Order order =
+                orderRepository.findById(orderId).orElseThrow(EntityNotFoundException::new);
+        // 주문 id 로 찾은 주문테이블의 회원 참조 email과 현재 로그인 한 사람을 비교
+        if (!StringUtils.equals(member.getEmail(), order.getMember().getEmail())){
+            return false;
+        }
+        return true;
+    }
+
+
+    // 주문 취소
+    public  void  cancelOrder(Long orderID){
+
+        Order order =
+        orderRepository.findById(orderID).orElseThrow(EntityNotFoundException::new);
+
+        order.setOrderStatus(OrderStatus.CANCEL);
+        // 주문 자식인 주문아이템들의 주문수량을 가지고 item의 주문수량에 더한다.
+
+        for (OrderItem orderItem : order.getOrderItemList()){
+            orderItem.getItem().setStockNumber(
+                 orderItem.getItem().getStockNumber() + orderItem.getCount()
+            );
+        }
+
     }
 
 
