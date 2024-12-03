@@ -26,9 +26,22 @@ public class CartItem {
     @JoinColumn(name = "item_id") // 매핑할 외래키 지정
     private Item item;
 
-    // 수량 ㅈ산수량 장바구니에 담긴 수량
+    // 수량 산수량 장바구니에 담긴 수량
     // 아이템 한 row 당
     private int count;
 
+    public static CartItem createCartItem(Cart cart, Item item, int count){
+        CartItem cartItem = new CartItem();
+        cartItem.setCart(cart);
+        cartItem.setItem(item);
+        cartItem.setCount(count);
+
+        return cartItem;
+    }
+
+    // count 증가
+    public void addCount(int count){
+        this.count += count;
+    }
 
 }
