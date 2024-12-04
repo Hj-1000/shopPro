@@ -28,6 +28,7 @@ public class SecurityConfig {
                         authorization -> authorization
                                 .requestMatchers("/members/login/**").permitAll()//로그인페이지는 누구나 접속이 가능한 권한
                                 .requestMatchers("/admin/**").hasRole("ADMIN")
+//                                .requestMatchers("/admin/**").hasRole("ADMIN", "USER")//두명한테 권한
                                 .requestMatchers("/cart/**").authenticated() // 로그인 한 사람만 접속 가능
                                 .requestMatchers("/orders/**").authenticated()
                                 .anyRequest().permitAll()       // 그외 다 열어

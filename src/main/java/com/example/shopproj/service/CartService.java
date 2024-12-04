@@ -1,5 +1,6 @@
 package com.example.shopproj.service;
 
+import com.example.shopproj.dto.CartDetailDTO;
 import com.example.shopproj.dto.CartItemDTO;
 import com.example.shopproj.entity.Cart;
 import com.example.shopproj.entity.CartItem;
@@ -14,6 +15,9 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -38,7 +42,7 @@ public class CartService {
         log.info("장바구니 서비스로 들어온 cartItemDTO" +cartItemDTO);
 
         Member member =
-        memberRepository.findByEmail(email);
+                memberRepository.findByEmail(email);
         log.info("장바구니 서비스에서 찾은 email" +email);
 
 
@@ -73,6 +77,29 @@ public class CartService {
             cartItemRepository.save(cartItem);
             return cartItem.getId();
         }
+    }
+
+    public List<CartDetailDTO> getCartList(String email){
+        //장바구니의 pk는 1:1 관계이기 때문에 그리고 email은 member 테이블에서
+        // 유니크키 이기에 유일하다 멤버는 1, 그에 관계의 장바구니도 1
+
+        List<CartDetailDTO> cartDetailDTOList = new ArrayList<>();
+
+        Member member =
+                memberRepository.findByEmail(email);
+
+        Cart cart =
+                cartRepository.findByMemberId(member.getId());
+//        Cart cart = cartRepository.findByMemberEmail(email);
+
+        if (cart == null){
+            return cartDetailDTOList;
+        }
+        // 장바구니에 담겨있는 상품 정보를 조회
+        cartDetailDTOList = cartItemRepository.findCartDetailDTOList(cart.getId());
+
+        return cartDetailDTOList;
+
     }
 
 }
