@@ -9,25 +9,18 @@ import lombok.*;
 @AllArgsConstructor
 public class CartDetailDTO {
 
-    private Long cartItemId;      // 장바구니 상품 아이디
+    private Long cartItemId; //장바구니 상품 아이디
 
-    private String itemNm;      // 상품명
+    private  String itemNm;  //상품명
 
-    private int price;
+    private int price;      //상품금액
 
-    private int count;
+    private int count; //수량
 
-    private String imgUrl;
+    private String imgUrl; //상품 이미지 경로
 
-    // 생성자
-    // @AllArgsConstructor 쓰면 아래꺼 안써도 된다
-//    public CartDetailDTO (Long cartItemId, String itemNm,
-//                          int price, int count, String imgUrl){
-//        this.cartItemId = cartItemId;
-//        this.itemNm = itemNm;
-//        this.price = price;
-//        this.count = count;
-//        this.imgUrl = imgUrl;
-//    }
+    //생성자
+
+
 
 }

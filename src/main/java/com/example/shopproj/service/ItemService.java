@@ -74,20 +74,12 @@ public class ItemService {
         Item item =
                 itemRepository.findById(id).orElseThrow(EntityNotFoundException::new);
 
-        if (item.getCreateBy().equals(email)){
-            ItemDTO itemDTO = modelMapper.map(item, ItemDTO.class)
-                    .setItemImgDTOList(item.getItemImgList());
-            return itemDTO;
-
-        }else {
-            ItemDTO itemDTO = null;
-            return itemDTO;
-        }
+        ItemDTO itemDTO = modelMapper.map(item, ItemDTO.class)
+                .setItemImgDTOList(item.getItemImgList());
 
 
 
-
-
+        return itemDTO;
     }
 
 
@@ -124,55 +116,80 @@ public class ItemService {
         return itemDTOPageResponseDTO;
     }
 
-    public ItemDTO update(ItemDTO itemDTO, Long id,List<MultipartFile> multipartFiles,Integer[] delino,Long mainino){
-        //아이템 dto 수정
+
+    public ItemDTO update(ItemDTO itemDTO, Long id, List<MultipartFile> multipartFiles, Integer[] delino, Long mainino) {
+        //아이템 수정
 
         Item item =
-        itemRepository.findById(itemDTO.getId()).orElseThrow(EntityNotFoundException::new);
+                itemRepository.findById(itemDTO.getId())
+                        .orElseThrow(EntityNotFoundException::new);
 
-        // set
+        //set
         item.setItemNm(itemDTO.getItemNm());
         item.setPrice(itemDTO.getPrice());
         item.setItemDetail(itemDTO.getItemDetail());
         item.setItemSellStatus(itemDTO.getItemSellStatus());
         item.setStockNumber(itemDTO.getStockNumber());
 
-        //삭제번호가 있다면
-        if (delino != null){
-            for (Integer ino : delino){
 
-                if (ino != null && !ino.equals("")){
-                    log.info("삭제할 번호는 " + ino+ " 입니다.");
-                    itemImgService.removeImg(ino.longValue());
+        //삭제번호가 있다면
+        if(delino != null) {
+            //삭제 번호가 있다면
+            for (Integer ino : delino) {
+
+                if (ino != null && !ino.equals("")) {
+                    log.info("삭제할 번호는 ino" +ino);
+                    itemImgService.removeImg( ino.longValue() );
                 }
             }
         }
 
         try {
-            itemImgService.update(id, multipartFiles , mainino);
+            itemImgService.update(id, multipartFiles, mainino);
+
         }catch (IOException e){
-            // 리다이렉트 업데이트에 id 값 가지고 가
+            // 리다이렉트 업데이트에 id값 가지고 갈까?
             // TODO: 2024-11-26
         }
 
-        return null;
+
+        return  null;
     }
+
 
     public void remove(Long id){
         log.info("서비스로 들어온 삭제할 아이템 번호 : " + id);
 
         itemRepository.deleteById(id);
 
-        // 삭제를 테스트 할 수 있는 조건 만들기
+        //삭제를 테스트 할 수 있는 조건 만들기
+
+
     }
 
-    public PageResponseDTO<ItemDTO> mainList(PageRequestDTO pageRequestDTO) {
 
+    public PageResponseDTO<ItemDTO> mainlist(PageRequestDTO pageRequestDTO) {
+
+        //일단 기본으로 전부 가져오기
+//        List<Item> list =
+//        itemRepository.findAll();
+//
+//        List<ItemDTO> itemDTOList =
+//        list.stream().map(
+//                item -> modelMapper.map(item , ItemDTO.class)
+//        ).collect(Collectors.toList());
+//
+//        return itemDTOList;
+
+
+//        itemRepository.getAdminItemPage();
         Pageable pageable = pageRequestDTO.getPageable("id");
         Page<Item> items =
                 itemRepository.getAdminItemPage(pageRequestDTO, pageable);
         List<ItemDTO> itemDTOPage =
-                items.getContent().stream().map(item -> modelMapper.map(item, ItemDTO.class))
+                items.getContent().stream().map(item -> modelMapper.map(item, ItemDTO.class).setItemImgDTOList(
+                                item.getItemImgList()
+                        )  )
                         .collect(Collectors.toList());
 
         PageResponseDTO<ItemDTO> itemDTOPageResponseDTO
@@ -183,5 +200,20 @@ public class ItemService {
                 .build();
         return itemDTOPageResponseDTO;
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 }

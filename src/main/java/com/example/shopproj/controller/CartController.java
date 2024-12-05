@@ -2,6 +2,8 @@ package com.example.shopproj.controller;
 
 import com.example.shopproj.dto.CartDetailDTO;
 import com.example.shopproj.dto.CartItemDTO;
+import com.example.shopproj.dto.CartOrderDTO;
+import com.example.shopproj.service.CartItemService;
 import com.example.shopproj.service.CartService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -12,52 +14,62 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
 import java.util.List;
 
 @Controller
-@Log4j2
 @RequiredArgsConstructor
+@Log4j2
 public class CartController {
 
     private final CartService cartService;
+    private final CartItemService cartItemService;
 
-    // 장바구니에 등록
+
+
+    //장바구니에 등록
     @PostMapping("/cart")
-    public ResponseEntity order(@Valid CartItemDTO cartItemDTO, BindingResult bindingResult, Principal principal){
-        log.info("브라우저에서 넘어온 값 " + cartItemDTO);
-        log.info("로그인이 되었다면 현재 로그인 : " + principal);
+    public  ResponseEntity order(@Valid  CartItemDTO cartItemDTO, BindingResult bindingResult, Principal principal){
 
-        // 유효성검사
-        if (bindingResult.hasErrors()){
+        log.info("브라우저에서 넘어온 값" + cartItemDTO);
+        log.info("로그인이 되어있다면 " + principal);
+
+
+        //유효성검사
+
+        if(bindingResult.hasErrors()){
+
             StringBuffer sb = new StringBuffer();
 
-            List<FieldError> fieldErrorList =
-                    bindingResult.getFieldErrors();
+            List<FieldError> fieldErrorList
+                    = bindingResult.getFieldErrors();
 
-            for (FieldError fieldError : fieldErrorList){
+            for(FieldError fieldError  :  fieldErrorList){
                 sb.append(fieldError.getDefaultMessage());
             }
-            return new ResponseEntity<String>(sb.toString(), HttpStatus.BAD_REQUEST);
-        }
-        // 값이 잘 넘어왔다면
-        String email = principal.getName();
-        // 저장된 cartItem의 기본키를 담을 그릇
 
+            return new ResponseEntity<String>( sb.toString() , HttpStatus.BAD_REQUEST);
+
+
+        }
+
+
+        //값이 잘 넘어왔다면
+        String email = principal.getName();
 
         try {
-            Long cartItemId =
-            cartService.addCart(cartItemDTO, email);
 
-            // 저장이 되었다면 브라우저로 다시 전송
-            return new ResponseEntity<Long>(cartItemId, HttpStatus.OK);
+            Long  cartItemId = cartService.addCart(cartItemDTO, email);
+
+            //저장이 되었다면 브라우저로 다시 전송
+            return new ResponseEntity<Long >(cartItemId , HttpStatus.OK);
+
         }catch (Exception e){
 
-            return new ResponseEntity<String>(e.getMessage(), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<String >(e.getMessage() , HttpStatus.BAD_REQUEST);
+
         }
 
 
@@ -66,18 +78,86 @@ public class CartController {
 
     @GetMapping("/cart")
     public String orderHist(Principal principal, Model model){
-        // principal을 사용한다는건 시큐리티에서 현재 로그인한 사람의 정보
-        // 시큐리티의 .usernameParameter("email")
-//        if (principal == null){
-//            // 리다이렉트 // 시큐리티를 사용하고 있으니 안해도 된다.
-//        }
-        List<CartDetailDTO> cartDetailDTOList =
-        cartService.getCartList(principal.getName());
+        //principal을 사용한다는건 시큐리티에서 현재 로그인한 사람의 정보
+        // 시큐리티의     .usernameParameter("email") 로 지정된 값
 
-        // 사용자에게 보여줄 장바구니 목록중에 CartDetailDTO(꼭 필요한 정보만 가공한 DTO)로 담은 List
+//        if(principal == null) {
+//            //리다이렉트 //시큐리티를 사용하고 있으니 안해도 된다.
+//        }
+        //사용자에게 보여줄 장바구니 목록
+        List<CartDetailDTO> cartDetailDTOList =
+                cartService.getCartList(principal.getName());
+
+        //사용자에게 보여줄 장바구니 목록중에 CartDetailDTO (꼭 필요한 정보만 가공한 DTO)로 담은 List
         model.addAttribute("cartDetailDTOList", cartDetailDTOList);
 
         return "cart/cartList";
 
     }
+
+    @PostMapping("/cartItem")
+    public ResponseEntity updateCartItem(@Valid CartItemDTO cartItemDTO, BindingResult bindingResult, Principal principal){
+        log.info("수량변경을 위해서 넘어온 값 : " + cartItemDTO);
+
+        // service에서 카트아이템 아이디를 통해서 카트아이템을 찾아서
+        // 카트아이템의 수량을 현재 받은 cartItemDTO의 count로 변경
+
+        if (bindingResult.hasErrors()){
+            StringBuffer sb = new StringBuffer();
+
+            List<FieldError> fieldErrorList
+                    = bindingResult.getFieldErrors();
+
+            for(FieldError fieldError  :  fieldErrorList){
+                sb.append(fieldError.getDefaultMessage());
+            }
+
+            return new ResponseEntity<String>( sb.toString() , HttpStatus.BAD_REQUEST);
+        }
+
+        try {
+            cartItemService.updateCartItemId(cartItemDTO, principal.getName());
+        }catch (Exception e){
+            return new ResponseEntity<String>("장바구니 수량변경이 잘못되었습니다. 고객센터문의", HttpStatus.BAD_REQUEST);
+        }
+
+
+        return new ResponseEntity<Long>(cartItemDTO.getItemid(), HttpStatus.OK);
+    }
+
+    @DeleteMapping("/cartItem/{cartItemId}")
+    public ResponseEntity deleteCartItem(@PathVariable("cartItemId") Long cartItemId, Principal principal ){
+
+        if (cartService.validateCartItem(cartItemId, principal.getName())){
+            return new ResponseEntity<String>("수정권한이 없습니다.", HttpStatus.FORBIDDEN);
+        }
+        // 장바구니 아이템 삭제
+        cartService.deleteCartItem(cartItemId);
+
+        return new ResponseEntity<Long>(cartItemId, HttpStatus.OK);
+    }
+
+    @PostMapping("/cart/orders")
+    public ResponseEntity orderCartItem(
+            @RequestBody CartOrderDTO cartOrderDTO, Principal principal){
+        log.info("컨트롤러로 들어온 " + cartOrderDTO);
+        List<CartOrderDTO> cartOrderDTOList = cartOrderDTO.getOrderDTOList();
+
+
+        if (cartOrderDTOList == null || cartOrderDTOList.size()==0){
+            return new ResponseEntity<String>("주문할 상품을 선택해주세요", HttpStatus.FORBIDDEN);
+        }
+
+        for (CartOrderDTO cartOder: cartOrderDTOList){
+            if (cartService.validateCartItem(cartOder.getCartItemId(), principal.getName()) ) {
+                return new ResponseEntity<String>("주문 권한이 없습니다.", HttpStatus.FORBIDDEN);
+            }
+
+        }
+//        Long orderId = cartOrderDTO;
+        return new ResponseEntity<Long>(1L, HttpStatus.OK);
+    }
+
+
+
 }

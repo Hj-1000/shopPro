@@ -2,10 +2,12 @@ package com.example.shopproj.service;
 
 import ch.qos.logback.core.util.StringUtil;
 import com.example.shopproj.constant.OrderStatus;
+import com.example.shopproj.dto.CartOrderDTO;
 import com.example.shopproj.dto.OrderDTO;
 import com.example.shopproj.dto.OrderHistDTO;
 import com.example.shopproj.dto.OrderItemDTO;
 import com.example.shopproj.entity.*;
+import com.example.shopproj.repository.CartItemRepository;
 import com.example.shopproj.repository.ItemRepository;
 import com.example.shopproj.repository.MemberRepository;
 import com.example.shopproj.repository.OrderRepository;
@@ -13,6 +15,7 @@ import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -33,7 +36,6 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final ItemRepository itemRepository;
     private final MemberRepository memberRepository;
-
 
     //주문 order, orderItem
     // 주문할 아이템 , 주문할 수량 , 주문하는 사람 이런게 있는게 아니라
@@ -151,9 +153,41 @@ public class OrderService {
 
 
     }
+    public Long orders(List<OrderDTO> orderDTOList, String email){
+        Member member = memberRepository.findByEmail(email);
+        Order order = new Order();
+        List<OrderItem> orderItemList = new ArrayList<>();
+
+        for (OrderDTO orderDTO : orderDTOList){
+
+            Item item =
+            itemRepository.findById(orderDTO.getItemId()).orElseThrow(EntityNotFoundException::new);
+
+            OrderItem orderItem = new OrderItem();
+            orderItem.setItem(item);
+            orderItem.setCount(orderDTO.getCount());
+            orderItem.setOrderPrice(item.getPrice());
+            orderItem.setOrder(order);
+
+            item.setStockNumber(item.getStockNumber() - orderDTO.getCount());
+
+            orderItemList.add(orderItem);
+        }
+
+        order.setMember(member);
+        order.setOrderStatus(OrderStatus.ORDER);
+        order.setOrderDate(LocalDateTime.now());
+        order.setOrderItemList(orderItemList);
+
+        orderRepository.save(order);
+
+        return order.getId();
+    }
 
 
-    //구매이력
+
+
+        //구매이력
     public Page<OrderHistDTO> getOrderList(String email, Pageable pageable) {
         //repository에서 필요한 email
 
